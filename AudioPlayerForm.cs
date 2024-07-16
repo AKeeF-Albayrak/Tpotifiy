@@ -16,6 +16,7 @@ namespace Tpotifiy
         {
             InitializeComponent();
             InitializeTrackBar();
+            InitializeProgressBar();
         }
 
         private void pictureBox1_Click(object sender, EventArgs e)
@@ -24,7 +25,7 @@ namespace Tpotifiy
 
             if (Session.isPlaying)
             {
-                Utilities.PlaySong("C:\\Users\\akifa\\OneDrive\\Desktop\\Tpotifiy\\Resources\\Rick Astley - Never Gonna Give You Up (Official Music Video).mp3",progressBar1);
+                Utilities.PlaySong("C:\\Users\\akifa\\OneDrive\\Desktop\\Tpotifiy\\Resources\\Rick Astley - Never Gonna Give You Up (Official Music Video).mp3",progressBar1,labelTimePassed);
                 pictureBox1.Image = Image.FromFile(@"C:\Users\akifa\OneDrive\Desktop\Tpotifiy\Resources\pause.png");
             }
             else
@@ -51,6 +52,23 @@ namespace Tpotifiy
             float volume = trackBarVolume.Value / 100f;
             Utilities.SetVolume(volume);
             labelVolume.Text = $"Volume: {trackBarVolume.Value}%";
+        }
+
+        private void InitializeProgressBar()
+        {
+            progressBar1.MouseClick += progressBar1_MouseClick;
+        }
+
+        private void progressBar1_MouseClick(object sender, MouseEventArgs e)
+        {
+            // Calculate the percentage of the click position
+            float clickPosition = (float)e.X / progressBar1.Width;
+
+            // Calculate the new position in the song in seconds
+            int newPosition = (int)(clickPosition * progressBar1.Maximum);
+
+            // Update the song position
+            Utilities.SeekTo(newPosition);
         }
     }
 }

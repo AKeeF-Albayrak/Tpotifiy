@@ -38,7 +38,7 @@
             // 
             this.panelAlbums.Location = new System.Drawing.Point(3, 1);
             this.panelAlbums.Name = "panelAlbums";
-            this.panelAlbums.Size = new System.Drawing.Size(197, 550);
+            this.panelAlbums.Size = new System.Drawing.Size(197, 559);
             this.panelAlbums.TabIndex = 0;
             // 
             // panelPlayer

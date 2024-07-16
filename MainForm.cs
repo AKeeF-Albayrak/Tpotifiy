@@ -17,6 +17,7 @@ namespace Tpotifiy
             InitializeComponent();
 
             this.IsMdiContainer = true;
+            this.StartPosition = FormStartPosition.CenterScreen;
         }
 
         private void MainForm_Load(object sender, EventArgs e)

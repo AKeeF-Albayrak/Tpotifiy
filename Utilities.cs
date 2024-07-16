@@ -13,7 +13,7 @@ using NAudio.Wave;
 
 namespace Tpotifiy
 {
-
+    // sasifre degistirme de hata aliniuyor degistirirken duzelt
     public static class Utilities
     {
         public static event EventHandler<string> SongTimeUpdated;
@@ -22,11 +22,12 @@ namespace Tpotifiy
         private static readonly string smtpServer = "smtp.gmail.com";
         private static readonly int smtpPort = 587;
         private static readonly string smtpUsername = "denemedenemedeneme134@gmail.com";
+        private static readonly string smtpPassword = "oqnblprcnjwkkcal";
 
         private static IWavePlayer waveOutDevice;
         private static AudioFileReader audioFileReader;
         private static Timer timer;
-        private static long currentPosition; // Şarkının durduğu pozisyon
+        private static long currentPosition;
         public static float Volume { get; set; } = 0.5f;
 
         public static string ComputeSha256Hash(string rawData)
@@ -221,24 +222,24 @@ namespace Tpotifiy
             }
         }
 
-        public static void PlaySong(string filePath, ProgressBar progressBar)
+        public static void PlaySong(string filePath, ProgressBar progressBar, Label label)
         {
             waveOutDevice = new WaveOut();
             audioFileReader = new AudioFileReader(filePath)
             {
                 Volume = Volume
             };
-            audioFileReader.Position = currentPosition; // Kaldığı yerden devam et
+            audioFileReader.Position = currentPosition; // Resume from last position
             waveOutDevice.Init(audioFileReader);
             waveOutDevice.Play();
 
-            // ProgressBar'u ayarla
+            // Initialize ProgressBar
             progressBar.Maximum = (int)audioFileReader.TotalTime.TotalSeconds;
 
-            // Timer oluştur ve başlat
+            // Timer to update ProgressBar
             timer = new Timer();
-            timer.Interval = 1000; // 1 saniyede bir güncelle
-            timer.Tick += Timer_Tick;
+            timer.Interval = 1000; // Update every second
+            timer.Tick += (sender, e) => Timer_Tick(sender, e, progressBar, label);
             timer.Start();
         }
 
@@ -262,14 +263,18 @@ namespace Tpotifiy
             }
         }
 
-        private static void Timer_Tick(object sender, EventArgs e)
+        private static void Timer_Tick(object sender, EventArgs e, ProgressBar progressBar,Label label1)
         {
             if (audioFileReader != null && waveOutDevice != null && waveOutDevice.PlaybackState == PlaybackState.Playing)
             {
                 TimeSpan currentTime = audioFileReader.CurrentTime;
                 string currentTimeString = currentTime.ToString(@"mm\:ss");
 
-                // MainForm'da currentTimeString'i kullan
+                // Update ProgressBar
+                progressBar.Value = (int)currentTime.TotalSeconds;
+                label1.Text = currentTimeString;
+
+                // Notify subscribers about the current song time
                 SongTimeUpdated?.Invoke(null, currentTimeString);
             }
         }
@@ -280,6 +285,18 @@ namespace Tpotifiy
                 audioFileReader.Volume = volume;
             }
             Volume = volume;
+        }
+
+        public static void SeekTo(int positionInSeconds)
+        {
+            if (audioFileReader != null && waveOutDevice != null)
+            {
+                // Set the new position in the audio file
+                audioFileReader.CurrentTime = TimeSpan.FromSeconds(positionInSeconds);
+
+                // Update the current position
+                currentPosition = audioFileReader.Position;
+            }
         }
     }
 }
